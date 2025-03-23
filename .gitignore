@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# FreeSurfer
+fsfast/
+subjects/
+mri/
+surf/
+stats/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Data
+*.nii.gz
+*.mgz
+*.mgh
+*.nii
+*.dcm
+*.dicom
+*.npy
+*.npz
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+
+# Results
+results/
+outputs/
+figures/
+*.png
+*.jpg
+*.pdf 
