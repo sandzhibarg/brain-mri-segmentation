@@ -20,29 +20,35 @@ process_subject() {
     
     echo "Processing subject: $subject"
     
-    # Process only ATV session
-    session_dir="$subject_dir/ses-siteATV"
-    
-    if [ -d "$session_dir" ]; then
-        echo "Processing ATV session for subject: $subject"
-        
-        # Look for T1w image in anat directory
-        t1_file=$(find "$session_dir" -name "*T1w.nii.gz" | head -n 1)
-        
-        if [ -n "$t1_file" ]; then
-            echo "T1 file: $t1_file"
+    # Loop through all session directories except ATT
+    for session_dir in "$subject_dir"/ses-*; do
+        if [ -d "$session_dir" ]; then
+            session_name=$(basename "$session_dir")
             
-            # Create subject name for FreeSurfer (subject_ATV)
-            fs_subject_name="${subject}_ATV"
+            # Skip ATT sessions
+            if [[ "$session_name" == ses-siteATT* ]]; then
+                echo "Skipping ATT session: $session_name"
+                continue
+            fi
             
-            # Run recon-all
-            recon-all -all -s "$fs_subject_name" -i "$t1_file" -threads 1
-        else
-            echo "No T1w image found for ATV session in subject: $subject"
+            echo "Processing session: $session_name"
+            
+            # Look for T1w image in anat directory
+            t1_file=$(find "$session_dir" -name "*T1w.nii.gz" | head -n 1)
+            
+            if [ -n "$t1_file" ]; then
+                echo "T1 file: $t1_file"
+                
+                # Create subject name for FreeSurfer (subject_session)
+                fs_subject_name="${subject}_${session_name}"
+                
+                # Run recon-all
+                recon-all -all -s "$fs_subject_name" -i "$t1_file" -threads 1
+            else
+                echo "No T1w image found for session: $session_name"
+            fi
         fi
-    else
-        echo "ATV session not found for subject: $subject"
-    fi
+    done
 }
 
 # Main processing loop
