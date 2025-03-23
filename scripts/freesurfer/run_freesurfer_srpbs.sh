@@ -3,6 +3,7 @@
 # Define the base directory
 BASE_DIR="/mnt/mydisk/data/raw/SRPBS/SRPBS_TS/sourcedata"
 SUBJECTS_DIR="/mnt/mydisk/data/processed/freesurfer"
+LOG_DIR="/mnt/mydisk/data/processed/freesurfer/logs"
 
 # Set FreeSurfer environment variables
 export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
@@ -10,8 +11,42 @@ export OMP_NUM_THREADS=1
 export FS_OPENMP_THREADS=1
 export SUBJECTS_DIR
 
-# Create SUBJECTS_DIR if it doesn't exist
+# Create necessary directories
 mkdir -p "$SUBJECTS_DIR"
+mkdir -p "$LOG_DIR"
+
+# Function to get current memory usage
+get_memory_usage() {
+    free -h | grep Mem | awk '{print $3}'
+}
+
+# Function to get current CPU usage
+get_cpu_usage() {
+    top -bn1 | grep "Cpu(s)" | awk '{print $2}'
+}
+
+# Function to log resource usage
+log_resources() {
+    local subject=$1
+    local session=$2
+    local start_time=$3
+    local end_time=$4
+    local memory_usage=$5
+    local cpu_usage=$6
+    
+    # Calculate duration
+    duration=$((end_time - start_time))
+    hours=$((duration / 3600))
+    minutes=$(( (duration % 3600) / 60 ))
+    seconds=$((duration % 60))
+    
+    # Create log entry
+    log_entry="$(date '+%Y-%m-%d %H:%M:%S') | Subject: $subject | Session: $session | Duration: ${hours}h ${minutes}m ${seconds}s | Memory: $memory_usage | CPU: ${cpu_usage}%"
+    
+    # Log to file
+    echo "$log_entry" >> "$LOG_DIR/freesurfer_processing.log"
+    echo "$log_entry"
+}
 
 # Function to process a single subject
 process_subject() {
@@ -42,8 +77,21 @@ process_subject() {
                 # Create subject name for FreeSurfer (subject_session)
                 fs_subject_name="${subject}_${session_name}"
                 
+                # Record start time and resources
+                start_time=$(date +%s)
+                start_memory=$(get_memory_usage)
+                start_cpu=$(get_cpu_usage)
+                
                 # Run recon-all
                 recon-all -all -s "$fs_subject_name" -i "$t1_file" -threads 1
+                
+                # Record end time and resources
+                end_time=$(date +%s)
+                end_memory=$(get_memory_usage)
+                end_cpu=$(get_cpu_usage)
+                
+                # Log resource usage
+                log_resources "$subject" "$session_name" "$start_time" "$end_time" "$end_memory" "$end_cpu"
             else
                 echo "No T1w image found for session: $session_name"
             fi
