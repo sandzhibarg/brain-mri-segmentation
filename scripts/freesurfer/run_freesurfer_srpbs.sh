@@ -1,19 +1,14 @@
 #!/bin/bash
 
-# Define the base directory
-BASE_DIR="/mnt/mydisk/data/raw/SRPBS/SRPBS_TS/sourcedata"
-SUBJECTS_DIR="/mnt/mydisk/data/processed/freesurfer"
-LOG_DIR="/mnt/mydisk/data/processed/freesurfer/logs"
+# Load configuration
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$SCRIPT_DIR/../../config/paths.sh"
 
 # Set FreeSurfer environment variables
 export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
 export OMP_NUM_THREADS=1
 export FS_OPENMP_THREADS=1
-export SUBJECTS_DIR
-
-# Create necessary directories
-mkdir -p "$SUBJECTS_DIR"
-mkdir -p "$LOG_DIR"
+export SUBJECTS_DIR="$FREESURFER_DIR"
 
 # Function to get current memory usage
 get_memory_usage() {
@@ -44,14 +39,14 @@ log_resources() {
     log_entry="$(date '+%Y-%m-%d %H:%M:%S') | Subject: $subject | Session: $session | Duration: ${hours}h ${minutes}m ${seconds}s | Memory: $memory_usage | CPU: ${cpu_usage}%"
     
     # Log to file
-    echo "$log_entry" >> "$LOG_DIR/freesurfer_processing.log"
+    echo "$log_entry" >> "$FREESURFER_LOG_DIR/freesurfer_processing.log"
     echo "$log_entry"
 }
 
 # Function to process a single subject
 process_subject() {
     local subject=$1
-    local subject_dir="$BASE_DIR/$subject"
+    local subject_dir="$SRPBS_DIR/$subject"
     
     echo "Processing subject: $subject"
     
@@ -100,7 +95,7 @@ process_subject() {
 }
 
 # Main processing loop
-for subject_dir in "$BASE_DIR"/sub-*; do
+for subject_dir in "$SRPBS_DIR"/sub-*; do
     if [ -d "$subject_dir" ]; then
         subject=$(basename "$subject_dir")
         process_subject "$subject"
