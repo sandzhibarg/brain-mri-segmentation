@@ -2,7 +2,7 @@
 
 # Load configuration
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source "$SCRIPT_DIR/../../config/paths.sh"
+source "/mnt/mydisk/brain_mri_segmentation/config/paths.sh"
 
 # Set FreeSurfer environment variables
 export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
@@ -100,4 +100,6 @@ for subject_dir in "$SRPBS_DIR"/sub-*; do
         subject=$(basename "$subject_dir")
         process_subject "$subject"
     fi
-done 
+done
+
+ps aux | grep run_freesurfer_srpbs.sh 
