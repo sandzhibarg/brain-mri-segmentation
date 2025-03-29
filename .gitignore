@@ -58,4 +58,7 @@ outputs/
 figures/
 *.png
 *.jpg
-*.pdf 
+*.pdf
+
+# sb_files
+venv_brain/
